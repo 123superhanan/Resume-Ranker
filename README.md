@@ -1,14 +1,7 @@
 
-
-```markdown
 # Resume Ranker
-
 A Retrieval-Augmented Generation (RAG) system that ranks and evaluates resumes against a job description, using local embeddings, a vector database, and a local LLM for reasoning — with a Streamlit interface for interaction.
-
----
-
-## Table of Contents
-- [Overview](#overview)
+---## Table of Contents- [Overview](#overview)
 - [What is RAG?](#what-is-rag)
 - [Why RAG for Resume Ranking?](#why-rag-for-resume-ranking)
 - [System Architecture](#system-architecture)
@@ -21,30 +14,22 @@ A Retrieval-Augmented Generation (RAG) system that ranks and evaluates resumes a
 - [Limitations](#limitations)
 - [Roadmap](#roadmap)
 - [Learnings](#learnings)
-
----
-
-## Overview
-
+---## Overview
 Resume Ranker takes a set of resumes (PDF) and a job description, then uses semantic search plus an LLM to score and explain how well each resume matches the role. Instead of relying on keyword matching, it retrieves the most *semantically relevant* sections of each resume and asks an LLM to reason over them.
 
 This is a learning-oriented implementation — the goal is to understand every stage of a RAG pipeline (chunking, embedding, retrieval, prompt construction, generation) by building it from scratch rather than relying on a framework like LangChain.
-
----
-
-## What is RAG?
-
+---## What is RAG?
 **Retrieval-Augmented Generation (RAG)** is a technique that grounds an LLM's response in external data instead of relying purely on what the model memorized during training.
 
 Standard flow:
-```
+
 Query → LLM → Answer (based only on training data)
-```
+
 
 RAG flow:
-```
+
 Query → Retrieve relevant context from a knowledge base → Inject context into prompt → LLM → Answer (grounded in real data)
-```
+
 
 This matters here because a general-purpose LLM has no idea what's inside *your* resumes or *your* job description — RAG is what lets it reason about your specific documents instead of hallucinating.
 
@@ -60,64 +45,62 @@ This matters here because a general-purpose LLM has no idea what's inside *your*
 
 ## System Architecture
 
-```
-                ┌─────────────┐
-                │  PDF Resumes │
-                └──────┬──────┘
-                       │
-                 Text Extraction
-                       │
-                       ▼
-                 ┌───────────┐
-                 │ Chunking  │
-                 └─────┬─────┘
-                       │
-                       ▼
-                 ┌───────────┐
-                 │ Embedding │  (Ollama embedding model)
-                 └─────┬─────┘
-                       │
-                       ▼
-              ┌─────────────────┐
-              │  Vector Store    │  (ChromaDB)
-              └────────┬─────────┘
-                       │
-          Job Description (query) ──► Embed ──► Retrieve top-N chunks
-                       │
-                       ▼
-              ┌───────────────────┐
-              │  Prompt Construction │
-              └──────────┬────────┘
-                         │
-                         ▼
-                  ┌─────────────┐
-                  │  LLM (Ollama) │
-                  └──────┬──────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │  Ranking + Reason │
-                └─────────┬────────┘
-                          │
-                          ▼
-                  ┌───────────────┐
-                  │  Streamlit UI   │
-                  └───────────────┘
-```
+
+┌─────────────┐
+│ PDF Resumes │
+└──────┬──────┘
+│
+Text Extraction
+│
+▼
+┌───────────┐
+│ Chunking │
+└─────┬─────┘
+│
+▼
+┌───────────┐
+│ Embedding │ (Ollama embedding model)
+└─────┬─────┘
+│
+▼
+┌─────────────────┐
+│ Vector Store │ (ChromaDB)
+└────────┬─────────┘
+│
+Job Description (query) ──► Embed ──► Retrieve top-N chunks
+│
+▼
+┌───────────────────┐
+│ Prompt Construction │
+└──────────┬────────┘
+│
+▼
+┌─────────────┐
+│ LLM (Ollama) │
+└──────┬──────┘
+│
+▼
+┌─────────────────┐
+│ Ranking + Reason │
+└─────────┬────────┘
+│
+▼
+┌───────────────┐
+│ Streamlit UI │
+└───────────────┘
+
 
 ---
 
 ## Pipeline Breakdown
 
-| Stage | Purpose | File |
-|---|---|---|
-| **Loader** | Extract raw text from uploaded PDF resumes | `src/loader.py` |
-| **Chunker** | Split resume text into overlapping chunks so retrieval is precise | `src/chunker.py` |
-| **Embedder** | Convert text chunks into vectors (semantic representation) | `src/embedder.py` |
-| **Vector Store** | Store and search embeddings for similarity | `src/vector_store.py` |
-| **Prompt Maker** | Combine job description + retrieved resume chunks into a structured prompt | `src/prompt_maker.py` |
-| **Generator** | Send prompt to local LLM, return ranking + explanation | `src/main.py` |
-| **UI** | Upload resumes, enter job description, view ranked results | `app.py` |
+- **Loader** (`src/loader.py`): Extracts raw text from uploaded PDF resumes and Job Descriptions.
+- **Chunker** (`src/chunker.py`): Splits text into overlapping semantic chunks to maintain context.
+- **Embedder** (`src/embedder.py`): Generates vector embeddings using a local sentence-transformers model.
+- **Vector Store** (`src/vector_store.py`): Indexes embeddings in an in-memory vector database for fast similarity search.
+- **Prompt Maker** (`src/prompt_maker.py`): Formulates a comparative prompt matching candidate chunks against the target JD.
+- **Generator** (`src/main.py`): Orchestrates the evaluation workflow and passes structured prompts to a local LLM.
+- **UI** (`app.py`): Provides a Streamlit dashboard to upload PDFs, paste JDs, and visualize candidate rankings.
 
 ---
 
@@ -133,20 +116,20 @@ This matters here because a general-purpose LLM has no idea what's inside *your*
 
 ## Project Structure
 
-```
+
 resume-ranker/
-  README.md
-  requirements.txt
-  data/                 # sample resumes + job descriptions for testing
-  src/
-    loader.py
-    chunker.py
-    embedder.py
-    vector_store.py
-    prompt_maker.py
-    main.py
-  app.py                # Streamlit entry point
-```
+README.md
+requirements.txt
+data/ # sample resumes + job descriptions for testing
+src/
+loader.py
+chunker.py
+embedder.py
+vector_store.py
+prompt_maker.py
+main.py
+app.py # Streamlit entry point
+
 
 ---
 
@@ -207,5 +190,4 @@ streamlit run app.py
 ## Learnings
 
 _(Fill this in as you build — documenting what broke and how you fixed it is genuinely valuable for interviews and shows real engineering process, not just a finished product.)_
-```
 
