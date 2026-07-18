@@ -1,0 +1,4 @@
+# Ignore all contents in the data directory
+data/
+vector_db/
+
