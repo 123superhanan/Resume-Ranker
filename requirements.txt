@@ -1,0 +1,9 @@
+faiss-cpu
+fastapi
+numpy
+PyMuPDF
+python-multipart
+sentence-transformers
+torch
+transformers
+uvicorn

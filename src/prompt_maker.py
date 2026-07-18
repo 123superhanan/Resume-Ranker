@@ -9,10 +9,10 @@ class ResumeSearch:
     def add(self, embeddings):
         self.index.add(np.array(embeddings))
 
-    def search(self, query_embedding, k=5):
-        distance, ids = self.index.search(
+    def search(self, query_embedding, k):
+        distances, indices = self.index.search(
             np.array(query_embedding),
             k
         )
 
-        return ids[0]
+        return distances, indices

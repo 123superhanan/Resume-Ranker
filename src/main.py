@@ -1,48 +1,60 @@
 import os
-
+import numpy as np
 from parser import extract_text
 from chunker import chunk_text
 from embedder import create_embeddings
 from embedder import embed_query
 from prompt_maker import ResumeSearch
 
+
+BASE_DIR = os.path.dirname(__file__)
+
+resume_folder = os.path.join(BASE_DIR, "..", "data") 
 documents = []
+count = 0
+MAX_RESUMES = 30
 
-resume_folder = "resumes"
+for root, dirs, files in os.walk(resume_folder):
 
-for file in os.listdir(resume_folder):
+    for file in files:
 
-    if not file.endswith(".pdf"):
-        continue
+        if not file.lower().endswith(".pdf"):
+            continue
 
-    path = os.path.join(resume_folder, file)
+        if count >= MAX_RESUMES:
+            break
 
-    print(f"Loading {file}")
+        path = os.path.join(root, file)
 
-    text = extract_text(path)
+        print(f"Loading: {file}")
 
-    chunks = chunk_text(text)
+        text = extract_text(path)
+        chunks = chunk_text(text)
 
-    for chunk in chunks:
-
-        documents.append(
-            {
+        for chunk in chunks:
+            documents.append({
                 "resume": file,
+                "category": os.path.basename(root),
                 "text": chunk
-            }
-        )
+            })
 
-print(f"\nLoaded {len(documents)} chunks")
+        count += 1
+
+    if count >= MAX_RESUMES:
+        break
+
+print(f"Loaded {count} resumes")
+print(f"Created {len(documents)} chunks")
 
 texts = [doc["text"] for doc in documents]
 
 embeddings = create_embeddings(texts)
-
-dimension = embeddings.shape[1]
+embeddings_array = np.array(embeddings)
+dimension = embeddings_array.shape[-1]
 
 search_engine = ResumeSearch(dimension)
 
-search_engine.add(embeddings)
+search_engine.add(embeddings_array)
 
 job_description = input("\nEnter Job Description:\n")
 
