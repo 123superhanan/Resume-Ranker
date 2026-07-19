@@ -6,10 +6,10 @@ import streamlit as st
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 # Import your existing code
-from parser import extract_text
-from chunker import chunk_text
-from embedder import create_embeddings, embed_query
-from prompt_maker import ResumeSearch  # Change if your file has another name
+from src.parser import extract_text
+from src.chunker import chunk_text
+from src.embedder import create_embeddings, embed_query
+from src.prompt_maker import ResumeSearch  
 
 st.set_page_config(
     page_title="AI Resume Ranker",
